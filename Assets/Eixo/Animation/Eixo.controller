@@ -80,7 +80,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Luna
+  m_Name: Eixo
   serializedVersion: 6
   m_AnimatorParameters:
   - m_Name: MoveZ
