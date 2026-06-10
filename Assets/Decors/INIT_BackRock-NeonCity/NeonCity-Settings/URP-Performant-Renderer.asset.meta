@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 707360a9c581a4bd7aa53bfeb1429f71
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298393
+  packageName: 3D Neon Capital City - Low Poly Urban Environment for Unity
+  packageVersion: 1.0
+  assetPath: Assets/BackRock-NeonCity/NeonCity-Settings/URP-Performant-Renderer.asset
+  uploadId: 811766
