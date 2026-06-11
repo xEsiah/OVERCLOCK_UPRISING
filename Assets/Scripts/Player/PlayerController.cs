@@ -37,7 +37,6 @@ public class PlayerController : MonoBehaviour
     private float _jumpCooldown;
     private float _lastTapTimeX;
     private float _lastTapDirectionX;
-    private float _hangStartTime;
     private Vector3 _moveDirVelocity;
     private Vector2 _inputValue;
     private Animator _animator;
@@ -145,7 +144,6 @@ public class PlayerController : MonoBehaviour
     {
         _isHanging = true;
         _isJumping = false;
-        
         _rb.linearVelocity = Vector3.zero;
         _rb.isKinematic = true; 
 
@@ -164,7 +162,6 @@ public class PlayerController : MonoBehaviour
 
     private void HandleHangingState()
     {
-        if (Time.time - _hangStartTime < 0.25f) return;
         if (_jumpAction.triggered)
         {
             StartCoroutine(MantleRoutine());
@@ -186,10 +183,8 @@ public class PlayerController : MonoBehaviour
         
         _animator.applyRootMotion = false;
 
-        // 1. On avance légèrement sur la plateforme
         transform.position += transform.forward * 0.25f;
         
-        // 2. LE "FLOOR SNAP" : On cherche le sol pour s'y poser parfaitement
         if (Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out RaycastHit hit, 1f))
         {
             transform.position = new Vector3(transform.position.x, hit.point.y + 0.01f, transform.position.z);
@@ -197,16 +192,14 @@ public class PlayerController : MonoBehaviour
 
         if (playerCollider != null) playerCollider.enabled = true;
         
-        // 3. On appelle StopHanging EN PREMIER (qui va remettre isKinematic à false)
         StopHanging();
 
-        // 4. MAINTENANT on peut remettre la vitesse à zéro sans fâcher Unity !
         _rb.linearVelocity = Vector3.zero;
         
         _isMantling = false; 
     }
 
-public void StopHanging()
+    public void StopHanging()
     {
         _isHanging = false;
         _rb.isKinematic = false;
