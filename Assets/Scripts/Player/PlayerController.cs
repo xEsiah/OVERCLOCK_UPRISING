@@ -10,25 +10,24 @@ public class PlayerController : MonoBehaviour
     public InputActionAsset inputActions;
 
     [Header("Movement")]
-    public float walkSpeed = 5f;
-    public float runSpeed = 10f;
-    public float jumpForce = 5f;
-    public float dashForce = 12.5f;
-    public float dashDuration = 0.2f;
-    public float rotationSpeed = 15f;
-    public float movementSmoothTime = 0.5f;
-    public float doubleTapTime = 0.3f;
-
-    [Header("Ledge Grab")]
-    public LayerMask ledgeLayer; 
-    public float ledgeForwardCheck = 0.5f; 
-    public float ledgeDownCheck = 0.5f;
+    private float walkSpeed = 5.5f;
+    private float runSpeed = 12.5f;
+    private float jumpForce = 4.5f;
+    private float dashForce = 7.5f;
+    private float dashDuration = 0.2f;
+    private float rotationSpeed = 7.5f;
+    private float movementSmoothTime = 0.5f;
+    private float doubleTapTime = 0.3f;
 
     [Header("Animator")]
     public float animationDampTime = 0.1f;
+    
+    [Header("Snapping offsets")]
+    private Vector3 hangOffset = new Vector3(0f, -2.25f, -0.05f);
 
     // États
     private bool _isHanging;
+    private bool _isMantling;
     private bool _isJumping;
     private bool _isRunning;
     private bool _isDashing;
@@ -38,9 +37,9 @@ public class PlayerController : MonoBehaviour
     private float _jumpCooldown;
     private float _lastTapTimeX;
     private float _lastTapDirectionX;
+    private float _hangStartTime;
     private Vector3 _moveDirVelocity;
     private Vector2 _inputValue;
-
     private Animator _animator;
     private Rigidbody _rb;
     private Transform _mainCamera;
@@ -54,6 +53,7 @@ public class PlayerController : MonoBehaviour
     private static readonly int HashDashLeft = Animator.StringToHash("DashLeft");
     private static readonly int HashDashRight = Animator.StringToHash("DashRight");
     private static readonly int HashIsHanging = Animator.StringToHash("IsHanging");
+    private static readonly int HashMantle = Animator.StringToHash("Mantle");
 
     void Awake()
     {
@@ -94,16 +94,11 @@ public class PlayerController : MonoBehaviour
     {
         _isRunning = _sprintAction.IsPressed();
 
+        if (_isMantling) return;
+
         if (_isHanging)
         {
-            if (_jumpAction.triggered) 
-            {
-                StartCoroutine(MantleRoutine());
-            }
-            else if (_inputValue.y < -0.5f) 
-            {
-                StopHanging();
-            }
+            HandleHangingState();
             return; 
         }
 
@@ -112,11 +107,10 @@ public class PlayerController : MonoBehaviour
             MoveAndRotate();
             UpdateAnimator();
             CheckLanding();
-            if (_isJumping) CheckForLedge();
         }
     }
 
-    #region Movement & Ledge Logic
+    #region Movement Logic
 
     private void MoveAndRotate()
     {
@@ -135,74 +129,88 @@ public class PlayerController : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetMoveDir), rotationSpeed * Time.deltaTime);
     }
 
-    private void CheckForLedge()
+    #endregion
+
+    #region Ledge Grab (Trigger Based)
+
+    private void OnTriggerEnter(Collider other)
     {
-        Vector3 origin = transform.position + Vector3.up * 1.5f;
-        Debug.DrawRay(origin, transform.forward * ledgeForwardCheck, Color.red);
-        
-        if (Physics.Raycast(origin, transform.forward, out RaycastHit hit, ledgeForwardCheck, ledgeLayer))
+        if (other.CompareTag("Ledge") && !_isHanging && _isJumping)
         {
-            Vector3 topOrigin = hit.point + (transform.forward * 0.1f) + (Vector3.up * 0.5f);
-            Debug.DrawRay(topOrigin, Vector3.down * 0.5f, Color.green);
-            
-            if (!Physics.Raycast(topOrigin, Vector3.down, 0.5f, ledgeLayer))
-            {
-                StartHanging(hit);
-            }
+            StartHanging(other.transform);
         }
     }
 
-    private void StartHanging(RaycastHit hit)
+    private void StartHanging(Transform ledgeTransform)
     {
         _isHanging = true;
         _isJumping = false;
-        _rb.useGravity = false;
+        
         _rb.linearVelocity = Vector3.zero;
-        
-        transform.forward = -hit.normal; 
-        transform.position = hit.point + (hit.normal * 0.4f) - (Vector3.up * 1.5f);
-        
+        _rb.isKinematic = true; 
+
+        _animator.SetBool(HashIsJumping, false); 
         _animator.SetBool(HashIsHanging, true);
-        _animator.Play("Mantle", 0, 0.15f); 
-        _animator.speed = 0f; 
-        
-        _rb.isKinematic = true;
+
+        transform.rotation = ledgeTransform.rotation;
+
+        Vector3 snapPosition = ledgeTransform.position 
+                             + (ledgeTransform.up * hangOffset.y) 
+                             + (ledgeTransform.forward * hangOffset.z) 
+                             + (ledgeTransform.right * hangOffset.x);
+                             
+        transform.position = snapPosition;
     }
 
-    private void StopHanging()
+    private void HandleHangingState()
     {
-        _isHanging = false;
-        _rb.isKinematic = false;
-        _rb.useGravity = true;
-        _animator.SetBool(HashIsHanging, false);
-        _animator.CrossFade("Locomotion", 0.1f);
-        _animator.speed = 1f;
+        if (Time.time - _hangStartTime < 0.25f) return;
+        if (_jumpAction.triggered)
+        {
+            StartCoroutine(MantleRoutine());
+        }
     }
 
     private IEnumerator MantleRoutine()
     {
-        _animator.speed = 1f;
+        _isMantling = true; 
         
-        Vector3 startPos = transform.position;
-        Vector3 endPos = startPos + (transform.up * 1.5f) + (transform.forward * 0.5f);
-        float duration = 0.4f;
-        float elapsed = 0f;
+        Collider playerCollider = GetComponent<Collider>();
+        if (playerCollider != null) playerCollider.enabled = false;
 
-        while (elapsed < duration)
+        _animator.applyRootMotion = true;
+        _animator.SetTrigger(HashMantle);
+        
+        float duration = 3.4f; 
+        yield return new WaitForSeconds(duration);
+        
+        _animator.applyRootMotion = false;
+
+        // 1. On avance légèrement sur la plateforme
+        transform.position += transform.forward * 0.25f;
+        
+        // 2. LE "FLOOR SNAP" : On cherche le sol pour s'y poser parfaitement
+        if (Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out RaycastHit hit, 1f))
         {
-            transform.position = Vector3.Lerp(startPos, endPos, elapsed / duration);
-            elapsed += Time.deltaTime;
-            yield return null;
+            transform.position = new Vector3(transform.position.x, hit.point.y + 0.01f, transform.position.z);
         }
-        
-        transform.position = endPos;
 
-       _isHanging = false;
+        if (playerCollider != null) playerCollider.enabled = true;
+        
+        // 3. On appelle StopHanging EN PREMIER (qui va remettre isKinematic à false)
+        StopHanging();
+
+        // 4. MAINTENANT on peut remettre la vitesse à zéro sans fâcher Unity !
+        _rb.linearVelocity = Vector3.zero;
+        
+        _isMantling = false; 
+    }
+
+public void StopHanging()
+    {
+        _isHanging = false;
         _rb.isKinematic = false;
-        _rb.useGravity = true;
         _animator.SetBool(HashIsHanging, false);
-        _animator.CrossFade("Locomotion", 0.1f);
-        _animator.speed = 1f;
     }
 
     #endregion
@@ -217,7 +225,7 @@ public class PlayerController : MonoBehaviour
             float currentDir = Mathf.Sign(newValue.x);
             if (Time.time - _lastTapTimeX < doubleTapTime && _lastTapDirectionX == currentDir)
             {
-                if (_canDash && !_isJumping && !_isDashing && !_isHanging)
+                if (_canDash && !_isJumping && !_isDashing && !_isHanging && !_isMantling)
                     StartCoroutine(DashRoutine(currentDir));
             }
             _lastTapTimeX = Time.time;
@@ -230,8 +238,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnJump(InputAction.CallbackContext ctx)
     {
-        if (_isHanging) return; // Empêche le saut si on est suspendu (ou rajoute une logique de "lâcher")
-        if (_isJumping || _isDashing) return;
+        if (_isHanging || _isJumping || _isDashing || _isMantling) return;
 
         _isJumping = true;
         _jumpCooldown = 0.2f;
@@ -244,7 +251,7 @@ public class PlayerController : MonoBehaviour
         if (!_isJumping) return;
         if (_jumpCooldown > 0f) { _jumpCooldown -= Time.deltaTime; return; }
         
-        if (Physics.Raycast(transform.position + Vector3.up * 0.2f, Vector3.down, 0.35f))
+        if (Physics.Raycast(transform.position + Vector3.up * 0.2f, Vector3.down, 0.5f))        
         {
             _isJumping = false;
             _animator.SetBool(HashIsJumping, false);
