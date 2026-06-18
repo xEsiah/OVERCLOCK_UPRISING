@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 061d872e8801dbb4c8efc0820bdc4786
+timeCreated: 1502907364
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 98091
+  packageName: Animated Fantasy Planet
+  packageVersion: 1.0
+  assetPath: Assets/Animated Fantasy Planet/Skybox_Prefab.prefab
+  uploadId: 196128

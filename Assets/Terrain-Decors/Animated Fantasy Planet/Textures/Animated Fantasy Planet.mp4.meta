@@ -1,0 +1,65 @@
+fileFormatVersion: 2
+guid: 39986192cd2767347b02c6058898db37
+timeCreated: 1502904315
+licenseType: Store
+VideoClipImporter:
+  serializedVersion: 2
+  useLegacyImporter: 0
+  quality: 0.5
+  isColorLinear: 0
+  originalWidth: 2048
+  originalHeight: 2048
+  frameRange: 0
+  startFrame: -1
+  endFrame: -1
+  frameCount: 241
+  frameRate: 25
+  colorSpace: 0
+  deinterlace: 0
+  sourceFileSize: 9249220
+  encodeAlpha: 0
+  sourceHasAlpha: 0
+  flipVertical: 0
+  flipHorizontal: 0
+  importAudio: 0
+  sourceAudioChannelCount: 
+  sourceAudioSampleRate: 
+  targetSettings:
+    0:
+      enableTranscoding: 1
+      codec: 0
+      resizeFormat: 0
+      aspectRatio: 0
+      customWidth: 2048
+      customHeight: 2048
+      bitrateMode: 2
+      spatialQuality: 2
+  output:
+    format: 1
+    settings:
+      enableTranscoding: 1
+      codec: 0
+      resizeFormat: 0
+      aspectRatio: 0
+      customWidth: 2048
+      customHeight: 2048
+      bitrateMode: 2
+      spatialQuality: 2
+    encodedWidth: 2048
+    encodedHeight: 2048
+    encodedStartFrame: 0
+    encodedEndFrame: 241
+    streamedResource:
+      source: library/metadata/39/39986192cd2767347b02c6058898db37.resource
+      offset: 0
+      size: 6033257
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 98091
+  packageName: Animated Fantasy Planet
+  packageVersion: 1.0
+  assetPath: Assets/Animated Fantasy Planet/Textures/Animated Fantasy Planet.mp4
+  uploadId: 196128

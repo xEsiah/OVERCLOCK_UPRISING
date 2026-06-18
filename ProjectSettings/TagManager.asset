@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - Ledge
+  - SpawnPoint
   layers:
   - Default
   - TransparentFX

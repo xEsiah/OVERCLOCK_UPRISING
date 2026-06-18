@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 9d8e9b22e5f7b92419a794c31dc23651
+timeCreated: 1501168846
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: -1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 98091
+  packageName: Animated Fantasy Planet
+  packageVersion: 1.0
+  assetPath: Assets/Animated Fantasy Planet/Materials/Up.mat
+  uploadId: 196128
