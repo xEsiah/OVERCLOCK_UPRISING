@@ -3,11 +3,8 @@ using UnityEngine;
 public class TunnelRotator : MonoBehaviour
 {
     [Header("Configuration de la Rotation")]
-    [Tooltip("Vitesse de rotation des éléments.")]
-    public float rotationSpeed = 30f;
-
-    [Tooltip("Si coché, un enfant sur deux tournera dans le sens inverse pour un effet plus dynamique.")]
-    public bool alternateDirection = true;
+    private float rotationSpeed = 30f;
+    private bool alternateDirection = true;
 
     private Transform[] tunnelParts;
 

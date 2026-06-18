@@ -1881,8 +1881,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ef12d76a505c2125a8bc47417ba887c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  rotationSpeed: 30
-  alternateDirection: 1
 --- !u!1 &1317331194
 GameObject:
   m_ObjectHideFlags: 0
@@ -2547,7 +2545,7 @@ MonoBehaviour:
   m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 93d54739383deeaf2942b956b6f82dfc, type: 2}
-  m_sharedMaterial: {fileID: -655282291475171013, guid: 93d54739383deeaf2942b956b6f82dfc, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: f57402a3771bbc065b465613e3cb367c, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
