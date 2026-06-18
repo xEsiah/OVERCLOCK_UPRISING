@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 17295a571d6b936409de6f545895489f
+timeCreated: 1501168846
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: -1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 98091
+  packageName: Animated Fantasy Planet
+  packageVersion: 1.0
+  assetPath: Assets/Animated Fantasy Planet/Materials/Down.mat
+  uploadId: 196128

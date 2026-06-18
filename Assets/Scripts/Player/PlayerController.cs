@@ -1,9 +1,11 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(PlayerStateManager))]
+[RequireComponent(typeof(PlayerAnimator))]
 public class PlayerController : MonoBehaviour
 {
     [Header("Input")]
@@ -16,48 +18,45 @@ public class PlayerController : MonoBehaviour
     private float dashForce = 7.5f;
     private float dashDuration = 0.2f;
     private float rotationSpeed = 7.5f;
-    private float movementSmoothTime = 0.5f;
+    private float movementSmoothTime = 0.25f;
     private float doubleTapTime = 0.3f;
 
-    [Header("Animator")]
-    public float animationDampTime = 0.1f;
-    
     [Header("Snapping offsets")]
-    private Vector3 hangOffset = new Vector3(0f, -2.25f, -0.05f);
+    private Vector3 hangOffset = new Vector3(0f, -2.15f, -0.1f);
 
-    // États
-    private bool _isHanging;
-    private bool _isMantling;
+    [Header("Références")]
+    private PlayerStateManager _stateManager;
+    private PlayerAnimator _playerAnimator;
+    private Rigidbody _rb;
+    private Transform _mainCamera;
+    private Collider _currentLedgeCollider;
+    private bool _wasLedgeAvailable;
+
+    [Header("États locaux")]
     private bool _isJumping;
     private bool _isRunning;
     private bool _isDashing;
     private bool _canDash = true;
 
-    // Données de mouvement
+    [Header("Données de mouvement")]
     private float _jumpCooldown;
     private float _lastTapTimeX;
     private float _lastTapDirectionX;
     private Vector3 _moveDirVelocity;
     private Vector2 _inputValue;
-    private Animator _animator;
-    private Rigidbody _rb;
-    private Transform _mainCamera;
+    
+    [Header("Actions")]
     private InputAction _moveAction;
     private InputAction _jumpAction;
     private InputAction _sprintAction;
-
-    // Hashes
-    private static readonly int HashMoveZ = Animator.StringToHash("MoveZ");
-    private static readonly int HashIsJumping = Animator.StringToHash("IsJumping");
-    private static readonly int HashDashLeft = Animator.StringToHash("DashLeft");
-    private static readonly int HashDashRight = Animator.StringToHash("DashRight");
-    private static readonly int HashIsHanging = Animator.StringToHash("IsHanging");
-    private static readonly int HashMantle = Animator.StringToHash("Mantle");
+    private InputAction _interactAction; 
+    private InputAction _dropAction;     
 
     void Awake()
     {
-        _animator = GetComponent<Animator>();
         _rb = GetComponent<Rigidbody>();
+        _stateManager = GetComponent<PlayerStateManager>();
+        _playerAnimator = GetComponent<PlayerAnimator>();
         _rb.constraints = RigidbodyConstraints.FreezeRotation;
         if (Camera.main != null) _mainCamera = Camera.main.transform;
     }
@@ -74,6 +73,8 @@ public class PlayerController : MonoBehaviour
         _moveAction = map.FindAction("Move", true);
         _jumpAction = map.FindAction("Jump", true);
         _sprintAction = map.FindAction("Sprint", true);
+        _interactAction = map.FindAction("Interact", true);
+        _dropAction = map.FindAction("Drop", true);
 
         _moveAction.performed += OnMove;
         _moveAction.canceled += OnMoveCanceled;
@@ -93,9 +94,9 @@ public class PlayerController : MonoBehaviour
     {
         _isRunning = _sprintAction.IsPressed();
 
-        if (_isMantling) return;
+        if (_stateManager.CurrentState == PlayerState.Mantling) return;
 
-        if (_isHanging)
+        if (_stateManager.CurrentState == PlayerState.Hanging)
         {
             HandleHangingState();
             return; 
@@ -106,6 +107,7 @@ public class PlayerController : MonoBehaviour
             MoveAndRotate();
             UpdateAnimator();
             CheckLanding();
+            CheckLedgeAvailability();
         }
     }
 
@@ -128,27 +130,57 @@ public class PlayerController : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetMoveDir), rotationSpeed * Time.deltaTime);
     }
 
+    private void UpdateAnimator()
+    {
+        if (_isDashing) return;
+        float targetZ = _inputValue.sqrMagnitude > 0.01f ? (_isRunning ? 1f : 0.75f) : 0f;
+        _playerAnimator.UpdateMoveAnimation(targetZ);
+    }
+
     #endregion
 
-    #region Ledge Grab (Trigger Based)
+    #region Ledge Grab & Mantle
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Ledge") && !_isHanging && _isJumping)
+        if (other.CompareTag("Ledge"))
         {
-            StartHanging(other.transform);
+            _currentLedgeCollider = other;
+        }
+
+        if (other.CompareTag("SpawnPoint") && SceneManager.GetActiveScene().name == "Init")
+    {
+        _stateManager.ChangeState(PlayerState.Tutorial);
+    }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Ledge") && _currentLedgeCollider == other)
+        {
+            _currentLedgeCollider = null;
+            if (_wasLedgeAvailable)
+            {
+                _stateManager.SetLedgeAvailable(false);
+                _wasLedgeAvailable = false;
+            }
+        }
+
+        if (other.CompareTag("SpawnPoint"))
+        {
+            _stateManager.ChangeState(PlayerState.Default);
         }
     }
 
     private void StartHanging(Transform ledgeTransform)
     {
-        _isHanging = true;
+        _stateManager.ChangeState(PlayerState.Hanging);
         _isJumping = false;
         _rb.linearVelocity = Vector3.zero;
         _rb.isKinematic = true; 
 
-        _animator.SetBool(HashIsJumping, false); 
-        _animator.SetBool(HashIsHanging, true);
+        _playerAnimator.SetJumping(false); 
+        _playerAnimator.SetHanging(true);
 
         transform.rotation = ledgeTransform.rotation;
 
@@ -165,23 +197,34 @@ public class PlayerController : MonoBehaviour
         if (_jumpAction.triggered)
         {
             StartCoroutine(MantleRoutine());
+            return;
+        }
+
+        bool isPressingBackwards = _inputValue.y < -0.5f;
+        bool isPressingDropButton = _dropAction != null && _dropAction.triggered;
+
+        if (isPressingBackwards || isPressingDropButton)
+        {
+            StopHanging();
         }
     }
 
     private IEnumerator MantleRoutine()
     {
-        _isMantling = true; 
+        _stateManager.ChangeState(PlayerState.Mantling);
         
         Collider playerCollider = GetComponent<Collider>();
         if (playerCollider != null) playerCollider.enabled = false;
 
-        _animator.applyRootMotion = true;
-        _animator.SetTrigger(HashMantle);
+        transform.position -= transform.forward * 0.03f; 
+
+        _playerAnimator.SetRootMotion(true);
+        _playerAnimator.TriggerMantle();
         
         float duration = 3.4f; 
         yield return new WaitForSeconds(duration);
         
-        _animator.applyRootMotion = false;
+        _playerAnimator.SetRootMotion(false);
 
         transform.position += transform.forward * 0.25f;
         
@@ -193,22 +236,20 @@ public class PlayerController : MonoBehaviour
         if (playerCollider != null) playerCollider.enabled = true;
         
         StopHanging();
-
         _rb.linearVelocity = Vector3.zero;
-        
-        _isMantling = false; 
     }
 
     public void StopHanging()
     {
-        _isHanging = false;
+        _stateManager.ChangeState(PlayerState.Default);
+        _stateManager.SetLedgeAvailable(false);
         _rb.isKinematic = false;
-        _animator.SetBool(HashIsHanging, false);
+        _playerAnimator.SetHanging(false);
     }
 
     #endregion
 
-    #region Input & Landing
+    #region Input & Landing / Dash
 
     private void OnMove(InputAction.CallbackContext ctx)
     {
@@ -218,7 +259,7 @@ public class PlayerController : MonoBehaviour
             float currentDir = Mathf.Sign(newValue.x);
             if (Time.time - _lastTapTimeX < doubleTapTime && _lastTapDirectionX == currentDir)
             {
-                if (_canDash && !_isJumping && !_isDashing && !_isHanging && !_isMantling)
+                if (_canDash && !_isJumping && !_isDashing && _stateManager.CurrentState == PlayerState.Default)
                     StartCoroutine(DashRoutine(currentDir));
             }
             _lastTapTimeX = Time.time;
@@ -231,11 +272,11 @@ public class PlayerController : MonoBehaviour
 
     private void OnJump(InputAction.CallbackContext ctx)
     {
-        if (_isHanging || _isJumping || _isDashing || _isMantling) return;
+        if (_stateManager.CurrentState != PlayerState.Default || _isJumping || _isDashing) return;
 
         _isJumping = true;
         _jumpCooldown = 0.2f;
-        _animator.SetBool(HashIsJumping, true);
+        _playerAnimator.SetJumping(true);
         _rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 
@@ -247,22 +288,33 @@ public class PlayerController : MonoBehaviour
         if (Physics.Raycast(transform.position + Vector3.up * 0.2f, Vector3.down, 0.5f))        
         {
             _isJumping = false;
-            _animator.SetBool(HashIsJumping, false);
+            _playerAnimator.SetJumping(false);
         }
     }
 
-    private void UpdateAnimator()
+    private void CheckLedgeAvailability()
     {
-        if (_isDashing) return;
-        float targetZ = _inputValue.sqrMagnitude > 0.01f ? (_isRunning ? 1f : 0.75f) : 0f;
-        _animator.SetFloat(HashMoveZ, targetZ, animationDampTime, Time.deltaTime);
+        bool canHang = (_currentLedgeCollider != null) 
+                    && (_stateManager.CurrentState == PlayerState.Default) 
+                    && _isJumping;
+
+        if (canHang != _wasLedgeAvailable)
+        {
+            _stateManager.SetLedgeAvailable(canHang);
+            _wasLedgeAvailable = canHang;
+        }
+
+        if (canHang && _interactAction != null && _interactAction.IsPressed())
+        {
+            StartHanging(_currentLedgeCollider.transform);
+        }
     }
 
     private IEnumerator DashRoutine(float direction)
     {
         _canDash = false;
         _isDashing = true;
-        _animator.SetTrigger(direction > 0 ? HashDashRight : HashDashLeft);
+        _playerAnimator.TriggerDash(direction);
         
         Vector3 dashDir = (direction > 0 ? _mainCamera.right : -_mainCamera.right);
         dashDir.y = 0;
