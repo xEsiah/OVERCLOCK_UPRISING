@@ -51,9 +51,9 @@ public class PlayerUIManager : MonoBehaviour
 
         switch (newState)
         {
-            case PlayerState.Tutorial:
+            case PlayerState.AtSpawn:
                 actionText.gameObject.SetActive(true);
-                actionText.text = "Jump [Space]\nSprint [L Shift]\nDash [2 tap Q/A|D]\nHang [E]\nWalk [ZQSD|WASD]";
+                actionText.text = "Walk [ZQSD|WASD]\nSprint [L Shift]\nAttack [L click]\nJump [Space]\nHang [E]\nDodges [2 tap Q/A|D]";
                 break;
 
             case PlayerState.Hanging:

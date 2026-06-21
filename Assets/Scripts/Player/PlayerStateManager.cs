@@ -6,7 +6,8 @@ public enum PlayerState
     Default,
     Hanging,
     Mantling,
-    Tutorial
+    AtSpawn,
+    Falling
 }
 
 public class PlayerStateManager : MonoBehaviour

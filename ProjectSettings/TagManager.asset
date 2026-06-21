@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Ledge
   - SpawnPoint
+  - Enemy
   layers:
   - Default
   - TransparentFX

@@ -1,16 +1,19 @@
 using UnityEngine;
+using System;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
-    [Header("Objets à conserver (DontDestroyOnLoad)")]
     public GameObject player;
     public GameObject targetCam;
     public GameObject mainCamera;
     public GameObject freeLookCamera;
     public GameObject globalVolume;
     public GameObject UI;
+
+    public int deathCount = 0;
+    public event Action<int> OnDeathCountChanged;
 
     void Awake()
     {
@@ -38,5 +41,11 @@ public class GameManager : MonoBehaviour
             if (globalVolume != null) Destroy(globalVolume);
             if (UI != null) Destroy(UI);
         }
+    }
+
+    public void RegisterDeath()
+    {
+        deathCount++;
+        OnDeathCountChanged?.Invoke(deathCount);
     }
 }
