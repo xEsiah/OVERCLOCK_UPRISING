@@ -26,7 +26,7 @@ public class DeathCounterUI : MonoBehaviour
     {
         if (deathText != null)
         {
-            deathText.text = "Deaths : " + count;
+            deathText.text = "Reboots : " + count;
         }
     }
 }

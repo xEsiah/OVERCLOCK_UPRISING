@@ -15,8 +15,8 @@ public class PlayerController : MonoBehaviour
 
     [Header("Movement")]
     private float walkSpeed = 5.5f;
-    private float runSpeed = 12.5f;
-    private float jumpForce = 4.5f;
+    public float runSpeed = 12.5f;
+    public float jumpForce = 4.5f;
     private float dodgeDashForce = 2f;
     private float dodgeDashDuration = 1f;
     private float rotationSpeed = 7.5f;
