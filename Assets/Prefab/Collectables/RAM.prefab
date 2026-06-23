@@ -104,6 +104,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Collectible
   collectibleIndex: 1
   rotationSpeed: -90
+  itemIndex: 1
 --- !u!135 &-2935318786587159395
 SphereCollider:
   m_ObjectHideFlags: 0

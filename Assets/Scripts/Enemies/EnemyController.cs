@@ -10,6 +10,7 @@ public class EnemyController : MonoBehaviour
     private Attack _attack;
     private Transform _player;
 
+    public float deathTreshold = -5f;
     private float _knockbackTimer;
     public float detectionRange = 3f;
     
@@ -58,7 +59,7 @@ public class EnemyController : MonoBehaviour
             }
         }
 
-        if (transform.position.y < -5f)
+        if (transform.position.y < deathTreshold)
         {
             Die();
         }

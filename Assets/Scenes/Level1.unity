@@ -1138,6 +1138,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1132870739}
     m_Modifications:
+    - target: {fileID: -8644222971490223061, guid: 0dd7b21b081e41f269a7c1231ada2f2f, type: 3}
+      propertyPath: itemIndex
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8419603777421170218, guid: 0dd7b21b081e41f269a7c1231ada2f2f, type: 3}
       propertyPath: m_Name
       value: RAM

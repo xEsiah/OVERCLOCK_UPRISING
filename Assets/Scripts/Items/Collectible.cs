@@ -6,11 +6,15 @@ public class Collectible : MonoBehaviour
     public float rotationSpeed = 90f;
     public int itemIndex;
 
-    void Start()
+    void OnEnable()
     {
-        if (GameManager.instance != null && GameManager.instance.collectedItems[itemIndex])
+        if (GameManager.instance != null)
         {
-            gameObject.SetActive(false);
+            if (GameManager.instance.collectedItems.Length > itemIndex && 
+                GameManager.instance.collectedItems[itemIndex])
+            {
+                gameObject.SetActive(false);
+            }
         }
     }
 
