@@ -9,12 +9,11 @@ public class Portal : MonoBehaviour
     public PortalType type;
 
     [Header("Configuration : Téléportation Locale")]
-    [Tooltip("Glisse ici un Empty GameObject placé là où le joueur doit réapparaître")]
     public Transform localDestination;
 
     [Header("Configuration : Changement de Scène")]
-    [Tooltip("Le nom exact de la scène à charger")]
     public string sceneToLoad;
+    public string targetSpawnPointName;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -23,10 +22,12 @@ public class Portal : MonoBehaviour
             if (type == PortalType.LocalTeleport)
             {
                 TeleportLocally(other.gameObject);
+                AudioManager.instance.PlayPortalLocalTeleport();
             }
             else if (type == PortalType.SceneTransition)
             {
-                LoadNextLevel();
+                AudioManager.instance.PlayPortalSceneTransition();
+                LoadLevel();
             }
         }
     }
@@ -43,21 +44,17 @@ public class Portal : MonoBehaviour
 
             if (cc != null) cc.enabled = true;
         }
-        else
-        {
-            Debug.LogWarning("Attention : Aucune destination assignée sur le portail " + gameObject.name);
-        }
     }
 
-    private void LoadNextLevel()
+    private void LoadLevel()
     {
         if (!string.IsNullOrEmpty(sceneToLoad))
         {
+            if (GameManager.instance != null)
+            {
+                GameManager.instance.targetSpawnPointName = targetSpawnPointName;
+            }
             SceneManager.LoadScene(sceneToLoad);
-        }
-        else
-        {
-            Debug.LogWarning("Attention : Aucun nom de scène configuré sur " + gameObject.name);
         }
     }
 }

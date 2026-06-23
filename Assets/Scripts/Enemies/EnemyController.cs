@@ -78,10 +78,9 @@ public class EnemyController : MonoBehaviour
 
     private void Die()
     {
-        if (ParticleManager.instance != null)
-        {
-            ParticleManager.instance.SpawnParticle(ParticleManager.instance.EnemyDisintegrationParticles, transform.position, transform.rotation);
-        }
+        if (AudioManager.instance != null) AudioManager.instance.PlayDisintegrationSound();
+        if (ParticleManager.instance != null) ParticleManager.instance.SpawnParticle(ParticleManager.instance.EnemyDisintegrationParticles, transform.position, transform.rotation);
+
         Destroy(gameObject);
     }
 

@@ -4,6 +4,15 @@ public class Collectible : MonoBehaviour
 {
     public int collectibleIndex;
     public float rotationSpeed = 90f;
+    public int itemIndex;
+
+    void Start()
+    {
+        if (GameManager.instance != null && GameManager.instance.collectedItems[itemIndex])
+        {
+            gameObject.SetActive(false);
+        }
+    }
 
     void Update()
     {
@@ -14,6 +23,7 @@ public class Collectible : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
+            AudioManager.instance.PlayCollectedItem();
             if (GameManager.instance != null)
             {
                 GameManager.instance.CollectItem(collectibleIndex);

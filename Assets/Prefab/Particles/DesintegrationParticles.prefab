@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8992543817685171299}
   - component: {fileID: 6054041286002354530}
   - component: {fileID: 8117696163756180149}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: DesintegrationParticles
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -9,6 +9,10 @@
 
 > Block Player movement during mantle (till the animation of Idle really start)
 
+> Reset all actions booleans went desintagrated
+
+> Fix the collider on plateform (making grip all arround maybe idk
+
 ---
 
 ## Addition ideas for later

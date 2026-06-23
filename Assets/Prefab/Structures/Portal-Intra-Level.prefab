@@ -128,6 +128,7 @@ MonoBehaviour:
   type: 1
   localDestination: {fileID: 0}
   sceneToLoad: 
+  targetSpawnPointName: 
 --- !u!1 &5558067654107143860
 GameObject:
   m_ObjectHideFlags: 0
@@ -159,6 +160,7 @@ Transform:
   m_Children:
   - {fileID: 8064543934960399433}
   - {fileID: 1099382025073928225}
+  - {fileID: 5113587864581640435}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7164560813160613107
@@ -274,3 +276,34 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 8691780276856062721, guid: 16d57e41ee327af4fa62a643ac03e416, type: 3}
+--- !u!1 &8273883253083636953
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5113587864581640435}
+  m_Layer: 0
+  m_Name: AltSpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5113587864581640435
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8273883253083636953}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1.55, y: 0.8, z: -0.13}
+  m_LocalScale: {x: 0.6666667, y: 0.6666667, z: 0.6666667}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5073843440183493646}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

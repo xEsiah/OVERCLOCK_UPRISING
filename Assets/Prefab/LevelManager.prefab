@@ -45,7 +45,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelManager
   spawnPoint: {fileID: 6573554674625768030, guid: 393379f7b06d4ec269ba63dfa66ced4a, type: 3}
-  disintegrationParticlePrefab: {fileID: 8894037406561020127, guid: dd6ae220ce543f0e4a3f7ac8dd95037c, type: 3}
-  reintegrationParticlePrefab: {fileID: 8894037406561020127, guid: 203f5c1cac91ab1678d15b63a83a6e76, type: 3}
   fallThreshold: -10
-  fadeDuration: 1.5
+  levelMusic: {fileID: 0}

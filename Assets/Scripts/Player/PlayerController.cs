@@ -143,6 +143,25 @@ public class PlayerController : MonoBehaviour
             CheckLedgeAvailability();
         }
     }
+
+    public void ResetStates()
+    {
+        _inputValue = Vector2.zero;
+        _moveDirVelocity = Vector3.zero;
+        _isJumping = false;
+        _isRunning = false;
+        _isDodging = false;
+        _canDodge = true;
+        _knockbackTimer = 0f;
+        _jumpCooldown = 0f;
+
+        _stateManager.ChangeState(PlayerState.Default);
+        
+        _playerAnimator.UpdateMoveAnimation(0f);
+        _playerAnimator.SetJumping(false);
+        _playerAnimator.SetFalling(false);
+        _playerAnimator.SetHanging(false);
+    }
     #endregion
 
     #region Input Handlers
@@ -179,9 +198,22 @@ public class PlayerController : MonoBehaviour
         if (_stateManager.CurrentState != PlayerState.Default || _isJumping || _isDodging) return;
 
         _isJumping = true;
+        AudioManager.instance.PlayJumpSound();
         _jumpCooldown = 0.2f;
         _playerAnimator.SetJumping(true);
         _rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+    
+        StartCoroutine(JumpTimeoutRoutine());
+    }
+
+    private IEnumerator JumpTimeoutRoutine()
+    {
+        yield return new WaitForSeconds(1.5f);
+        if (_isJumping)
+        {
+            _isJumping = false;
+            _playerAnimator.SetJumping(false);
+        }
     }
 
     /// <summary>
@@ -189,7 +221,11 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void OnAttack(InputAction.CallbackContext ctx)
     {
-        if (_stateManager.CurrentState == PlayerState.Default && !_isDodging && !_isJumping && _attack.CanAttack())
+        bool canAttackInCurrentState = _stateManager.CurrentState == PlayerState.Default || 
+                                       _stateManager.CurrentState == PlayerState.Falling || 
+                                       _isJumping;
+
+        if (canAttackInCurrentState && !_isDodging && _attack.CanAttack())
         {
             _attack.PerformAttack();
         }
@@ -262,6 +298,7 @@ public class PlayerController : MonoBehaviour
         _canDodge = false;
         _isDodging = true;
         _playerAnimator.TriggerDodge(direction);
+        AudioManager.instance.PlayDashSound();
         
         GameObject activeDodgeParticles = ParticleManager.instance.SpawnParticle(ParticleManager.instance.DodgeParticles, transform.position, Quaternion.identity, transform, 0f);
 
@@ -371,6 +408,7 @@ public class PlayerController : MonoBehaviour
         transform.position -= transform.forward * 0.03f; 
 
         _playerAnimator.SetRootMotion(true);
+        AudioManager.instance.PlayMantleSound();
         _playerAnimator.TriggerMantle();
         
         float duration = 3.4f; 

@@ -53,7 +53,7 @@ public class PlayerUIManager : MonoBehaviour
         {
             case PlayerState.AtSpawn:
                 actionText.gameObject.SetActive(true);
-                actionText.text = "Walk [ZQSD|WASD]\nSprint [L Shift]\nAttack [L click]\nJump [Space]\nHang [E]\nDodges [2 tap Q/A|D]";
+                actionText.text = "Walk [ZQSD|WASD]\nSprint [L Shift]\nAttack [L click]\nJump [Space]\nHang [E]\nDodge [QQ/AA|DD]";
                 break;
 
             case PlayerState.Hanging:

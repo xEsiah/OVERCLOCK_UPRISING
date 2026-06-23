@@ -40,6 +40,22 @@ public class Attack : MonoBehaviour
         _animator.SetTrigger(HashAttack);
     }
 
+    public void TriggerAttackSound()
+    {
+        if (AudioManager.instance != null)
+        {
+            AudioManager.instance.PlayAttackSound();
+        }
+    }
+
+    public void TriggerAttackParticles()
+    {
+        if (attackOrigin != null)
+        {
+            ParticleManager.instance.SpawnParticle(ParticleManager.instance.DodgeParticles, attackOrigin.position, attackOrigin.rotation);
+        }
+    }
+
     public void TriggerHit()
     {
         if (attackOrigin == null) return;
