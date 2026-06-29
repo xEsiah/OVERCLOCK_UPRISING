@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Rendering;
 
 public class LevelManager : MonoBehaviour
 {
@@ -24,6 +25,11 @@ public class LevelManager : MonoBehaviour
 
     void Start()
     {
+        if (SceneManager.GetActiveScene().name == "Level3")
+        {
+            ApplyCyberpunkLighting("#C60E23");
+        }
+
         if (GameManager.instance != null && !string.IsNullOrEmpty(GameManager.instance.targetSpawnPointName))
         {
             GameObject dynamicSpawn = GameObject.Find(GameManager.instance.targetSpawnPointName);
@@ -144,6 +150,28 @@ public class LevelManager : MonoBehaviour
 
             player.SetActive(true);
             if (playerCc != null) playerCc.enabled = true;
+        }
+    }
+
+    private void ApplyCyberpunkLighting(string hexColor)
+    {
+        Color targetColor;
+        
+        if (ColorUtility.TryParseHtmlString(hexColor, out targetColor))
+        {
+            Light dirLight = RenderSettings.sun;
+            if (dirLight != null)
+            {
+                dirLight.color = targetColor;
+            }
+
+            RenderSettings.ambientLight = targetColor;
+
+            Debug.Log($"[LevelManager] Ambiance Blackwall {hexColor} appliquée sur {SceneManager.GetActiveScene().name}");
+        }
+        else
+        {
+            Debug.LogError($"[LevelManager] Impossible de lire le code couleur : {hexColor}");
         }
     }
 }
