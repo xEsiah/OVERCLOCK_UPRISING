@@ -64,7 +64,7 @@ public class GameManager : MonoBehaviour
                 }
                 break;
             case 2:
-                if (pc != null) pc.jumpForce = 8.5f;
+                if (pc != null) pc.jumpForce = 9.5f;
                 if (attack != null) attack.pushForce = 20f;
                 break;
         }

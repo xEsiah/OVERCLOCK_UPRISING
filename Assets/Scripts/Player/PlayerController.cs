@@ -208,7 +208,7 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator JumpTimeoutRoutine()
     {
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(1f);
         if (_isJumping)
         {
             _isJumping = false;

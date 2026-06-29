@@ -4807,6 +4807,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea1cc6e38dd8119c8857862fd8ebaf1c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
+  deathTreshold: -5
   detectionRange: 3
 --- !u!1 &1442736636
 GameObject:
@@ -7268,7 +7269,7 @@ PrefabInstance:
       objectReference: {fileID: 2076441839}
     - target: {fileID: 8141514110356795127, guid: e915c1d022a8459078b665afb148bad5, type: 3}
       propertyPath: fallThreshold
-      value: -50
+      value: -25
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
